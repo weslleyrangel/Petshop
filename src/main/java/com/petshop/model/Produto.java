@@ -1,6 +1,7 @@
 package com.petshop.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
 @Entity
@@ -10,15 +11,19 @@ public class Produto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "O nome do produto é obrigatório")
+    @Size(max = 100, message = "O nome do produto deve ter no máximo 100 caracteres")
     @Column(nullable = false)
     private String nome;
 
     @Column
     private String descricao;
 
+    @Positive(message = "O preço deve ser um valor positivo")
     @Column(nullable = false)
     private BigDecimal preco;
 
+    @PositiveOrZero(message = "A quantidade em estoque deve ser um valor positivo ou zero")
     @Column(nullable = false)
     private int quantidadeEstoque;
 

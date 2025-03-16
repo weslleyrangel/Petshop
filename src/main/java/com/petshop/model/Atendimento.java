@@ -26,10 +26,6 @@ public class Atendimento {
     @Column
     private String observacoes;
 
-    @ManyToOne
-    @JoinColumn(name = "funcionario_id", nullable = false)
-    private Funcionario funcionario;
-
     @Column(nullable = false)
     private BigDecimal valorCobrado;
 
@@ -48,9 +44,6 @@ public class Atendimento {
 
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
-
-    public Funcionario getFuncionario() { return funcionario; }
-    public void setFuncionario(Funcionario funcionario) { this.funcionario = funcionario; }
 
     public BigDecimal getValorCobrado() { return valorCobrado; }
     public void setValorCobrado(BigDecimal valorCobrado) { this.valorCobrado = valorCobrado; }

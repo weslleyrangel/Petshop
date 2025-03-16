@@ -1,35 +1,55 @@
 package com.petshop.controller;
 
 import com.petshop.dao.ServicoDAO;
-import com.petshop.dao.ServicoDAOImpl;
 import com.petshop.model.Servico;
+import com.petshop.exception.ServicoException;
 
 import java.util.List;
 
 public class ServicoController {
-    private ServicoDAO servicoDAO;
+    private final ServicoDAO servicoDAO;
 
     public ServicoController(ServicoDAO servicoDAO) {
         this.servicoDAO = servicoDAO;
     }
 
-    public Servico buscarPorId(Long id) {
-        return servicoDAO.buscarPorId(id);
+    public Servico buscarPorId(Long id) throws ServicoException {
+        try {
+            return servicoDAO.buscarPorId(id);
+        } catch (Exception e) {
+            throw new ServicoException("Erro ao buscar serviço por ID: " + id, e);
+        }
     }
 
-    public List<Servico> listarTodos() {
-        return servicoDAO.listarTodos();
+    public List<Servico> listarTodos() throws ServicoException {
+        try {
+            return servicoDAO.listarTodos();
+        } catch (Exception e) {
+            throw new ServicoException("Erro ao listar serviços", e);
+        }
     }
 
-    public void salvar(Servico servico) {
-        servicoDAO.salvar(servico);
+    public void salvar(Servico servico) throws ServicoException {
+        try {
+            servicoDAO.salvar(servico);
+        } catch (Exception e) {
+            throw new ServicoException("Erro ao salvar serviço", e);
+        }
     }
 
-    public void atualizar(Servico servico) {
-        servicoDAO.atualizar(servico);
+    public void atualizar(Servico servico) throws ServicoException {
+        try {
+            servicoDAO.atualizar(servico);
+        } catch (Exception e) {
+            throw new ServicoException("Erro ao atualizar serviço", e);
+        }
     }
 
-    public void excluir(Servico servico) {
-        servicoDAO.excluir(servico);
+    public void excluir(Servico servico) throws ServicoException {
+        try {
+            servicoDAO.excluir(servico);
+        } catch (Exception e) {
+            throw new ServicoException("Erro ao excluir serviço", e);
+        }
     }
 }

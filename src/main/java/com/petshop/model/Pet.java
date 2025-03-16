@@ -30,8 +30,9 @@ public class Pet {
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Atendimento> atendimentos = new ArrayList<>();
+    // Removendo a lista de atendimentos
+    // @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // private List<Atendimento> atendimentos = new ArrayList<>();
 
     // Getters e Setters
     public Long getId() { return id; }
@@ -54,7 +55,4 @@ public class Pet {
 
     public Cliente getCliente() { return cliente; }
     public void setCliente(Cliente cliente) { this.cliente = cliente; }
-
-    public List<Atendimento> getAtendimentos() { return atendimentos; }
-    public void setAtendimentos(List<Atendimento> atendimentos) { this.atendimentos = atendimentos; }
 }
