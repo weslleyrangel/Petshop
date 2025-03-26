@@ -1,38 +1,39 @@
 package com.petshop.model;
 
-import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+public class Cliente {
+    private Long id;
+    private String nome;
+    private String email;
 
-@Entity
-@Table(name = "clientes")
-@PrimaryKeyJoinColumn(name = "usuario_id")
-public class Cliente extends Usuario {
-    @Column
-    private String endereco;
+    public Cliente(Long id, String nome, String email) {
+        this.id = id;
+        this.nome = nome;
+        this.email = email;
+    }
+    // Construtores, getters e setters
 
-    @Column
-    private String cpf;
-
-    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Pet> pets = new ArrayList<>();
-
-    public Cliente() {
-        this.setTipo(TipoUsuario.CLIENTE);
+    public Long getId() {
+        return id;
     }
 
-    // Getters e Setters
-    public String getEndereco() { return endereco; }
-    public void setEndereco(String endereco) { this.endereco = endereco; }
-
-    public String getCpf() { return cpf; }
-    public void setCpf(String cpf) { this.cpf = cpf; }
-
-    public List<Pet> getPets() { return pets; }
-    public void setPets(List<Pet> pets) { this.pets = pets; }
-
-    public void adicionarPet(Pet pet) {
-        pet.setCliente(this);
-        this.pets.add(pet);
+    public void setId(Long id) {
+        this.id = id;
     }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    
 }

@@ -1,46 +1,40 @@
 package com.petshop.dao;
 
 import com.petshop.model.Venda;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VendaDAOImpl implements VendaDAO {
-    private EntityManager entityManager;
-
-    public VendaDAOImpl(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
+    private List<Venda> vendas = new ArrayList<>();
 
     @Override
     public Venda buscarPorId(Long id) {
-        return entityManager.find(Venda.class, id);
+        return vendas.stream()
+                .filter(venda -> venda.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public List<Venda> listarTodos() {
-        Query query = entityManager.createQuery("SELECT v FROM Venda v");
-        return query.getResultList();
+        return new ArrayList<>(vendas);
     }
 
     @Override
     public void salvar(Venda venda) {
-        entityManager.getTransaction().begin();
-        entityManager.persist(venda);
-        entityManager.getTransaction().commit();
+        vendas.add(venda);
     }
 
     @Override
     public void atualizar(Venda venda) {
-        entityManager.getTransaction().begin();
-        entityManager.merge(venda);
-        entityManager.getTransaction().commit();
+        int index = vendas.indexOf(buscarPorId(venda.getId()));
+        if (index != -1) {
+            vendas.set(index, venda);
+        }
     }
 
     @Override
     public void excluir(Venda venda) {
-        entityManager.getTransaction().begin();
-        entityManager.remove(venda);
-        entityManager.getTransaction().commit();
+        vendas.removeIf(v -> v.getId().equals(venda.getId()));
     }
 }

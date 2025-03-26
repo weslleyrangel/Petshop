@@ -1,68 +1,52 @@
 package com.petshop.dao;
 
 import com.petshop.model.Produto;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProdutoDAOImpl implements ProdutoDAO {
-    private EntityManager entityManager;
-
-    public ProdutoDAOImpl(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
+    private List<Produto> produtos = new ArrayList<>();
 
     @Override
     public Produto buscarPorId(Long id) {
-        return entityManager.find(Produto.class, id);
+        return produtos.stream()
+                .filter(produto -> produto.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public List<Produto> listarTodos() {
-        Query query = entityManager.createQuery("SELECT p FROM Produto p");
-        return query.getResultList();
-    }
-
-    @Override
-    public List<Produto> listarPorCategoria(String categoria) {
-        Query query = entityManager.createQuery("SELECT p FROM Produto p WHERE p.categoria = :categoria");
-        query.setParameter("categoria", categoria);
-        return query.getResultList();
+        return new ArrayList<>(produtos);
     }
 
     @Override
     public void salvar(Produto produto) {
-        entityManager.getTransaction().begin();
-        entityManager.persist(produto);
-        entityManager.getTransaction().commit();
+        produtos.add(produto);
     }
 
     @Override
     public void atualizar(Produto produto) {
-        entityManager.getTransaction().begin();
-        entityManager.merge(produto);
-        entityManager.getTransaction().commit();
+        int index = produtos.indexOf(buscarPorId(produto.getId()));
+        if (index != -1) {
+            produtos.set(index, produto);
+        }
     }
 
     @Override
     public void excluir(Produto produto) {
-        entityManager.getTransaction().begin();
-        entityManager.remove(produto);
-        entityManager.getTransaction().commit();
+        produtos.removeIf(p -> p.getId().equals(produto.getId()));
     }
 
-    @Override
+    public List<Produto> listarPorCategoria(String categoria) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
     public boolean verificarDisponibilidadeEstoque(Long produtoId, int quantidade) {
-        Produto produto = buscarPorId(produtoId);
-        return produto != null && produto.getQuantidadeEstoque() >= quantidade;
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
-    @Override
     public void atualizarEstoque(Long produtoId, int quantidade) {
-        Produto produto = buscarPorId(produtoId);
-        if (produto != null) {
-            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - quantidade);
-            atualizar(produto);
-        }
+        throw new UnsupportedOperationException("Not supported yet."); 
     }
 }

@@ -57,7 +57,7 @@ public class Venda {
     public void setItens(List<ItemVenda> itens) { this.itens = itens; }
 
     public void adicionarItem(ItemVenda item) {
-        item.setVenda(this);
+        //item.setVenda(this);
         this.itens.add(item);
         this.recalcularTotal();
     }

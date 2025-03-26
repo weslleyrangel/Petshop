@@ -1,53 +1,51 @@
 package com.petshop.dao;
 
 import com.petshop.model.Pet;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PetDAOImpl implements PetDAO {
-    private EntityManager entityManager;
-
-    public PetDAOImpl(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
+    private List<Pet> pets = new ArrayList<>();
 
     @Override
     public Pet buscarPorId(Long id) {
-        return entityManager.find(Pet.class, id);
+        return pets.stream()
+                .filter(pet -> pet.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public List<Pet> listarTodos() {
-        Query query = entityManager.createQuery("SELECT p FROM Pet p");
-        return query.getResultList();
+        return new ArrayList<>(pets);
     }
 
     @Override
     public List<Pet> listarPorCliente(Long clienteId) {
-        Query query = entityManager.createQuery("SELECT p FROM Pet p WHERE p.cliente.id = :clienteId");
-        query.setParameter("clienteId", clienteId);
-        return query.getResultList();
+        List<Pet> result = new ArrayList<>();
+        for (Pet pet : pets) {
+            if (pet.getCliente() != null && pet.getCliente().getId().equals(clienteId)) {
+                result.add(pet);
+            }
+        }
+        return result;
     }
 
     @Override
     public void salvar(Pet pet) {
-        entityManager.getTransaction().begin();
-        entityManager.persist(pet);
-        entityManager.getTransaction().commit();
+        pets.add(pet);
     }
 
     @Override
     public void atualizar(Pet pet) {
-        entityManager.getTransaction().begin();
-        entityManager.merge(pet);
-        entityManager.getTransaction().commit();
+        int index = pets.indexOf(buscarPorId(pet.getId()));
+        if (index != -1) {
+            pets.set(index, pet);
+        }
     }
 
     @Override
     public void excluir(Pet pet) {
-        entityManager.getTransaction().begin();
-        entityManager.remove(pet);
-        entityManager.getTransaction().commit();
+        pets.removeIf(p -> p.getId().equals(pet.getId()));
     }
 }

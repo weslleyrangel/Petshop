@@ -2,79 +2,83 @@ package com.petshop.dao;
 
 import com.petshop.model.Agendamento;
 import com.petshop.model.StatusAgendamento;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class AgendamentoDAOImpl implements AgendamentoDAO {
-    private EntityManager entityManager;
-
-    public AgendamentoDAOImpl(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
+    private List<Agendamento> agendamentos = new ArrayList<>();
 
     @Override
     public Agendamento buscarPorId(Long id) {
-        return entityManager.find(Agendamento.class, id);
+        return agendamentos.stream()
+                .filter(agendamento -> agendamento.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public List<Agendamento> listarTodos() {
-        Query query = entityManager.createQuery("SELECT a FROM Agendamento a");
-        return query.getResultList();
+        return new ArrayList<>(agendamentos);
     }
 
     @Override
     public List<Agendamento> listarPorPet(Long petId) {
-        Query query = entityManager.createQuery("SELECT a FROM Agendamento a WHERE a.pet.id = :petId");
-        query.setParameter("petId", petId);
-        return query.getResultList();
+        List<Agendamento> result = new ArrayList<>();
+        for (Agendamento agendamento : agendamentos) {
+            if (agendamento.getPet() != null && agendamento.getPet().getId().equals(petId)) {
+                result.add(agendamento);
+            }
+        }
+        return result;
     }
 
     @Override
     public List<Agendamento> listarPorData(Date data) {
-        Query query = entityManager.createQuery("SELECT a FROM Agendamento a WHERE DATE(a.dataHora) = :data");
-        query.setParameter("data", data);
-        return query.getResultList();
+        List<Agendamento> result = new ArrayList<>();
+        for (Agendamento agendamento : agendamentos) {
+            if (agendamento.getDataHora().equals(data)) {
+                result.add(agendamento);
+            }
+        }
+        return result;
     }
 
     @Override
     public List<Agendamento> listarPorStatus(StatusAgendamento status) {
-        Query query = entityManager.createQuery("SELECT a FROM Agendamento a WHERE a.status = :status");
-        query.setParameter("status", status);
-        return query.getResultList();
+        List<Agendamento> result = new ArrayList<>();
+        for (Agendamento agendamento : agendamentos) {
+            if (agendamento.getStatus() == status) {
+                result.add(agendamento);
+            }
+        }
+        return result;
     }
 
     @Override
     public void salvar(Agendamento agendamento) {
-        entityManager.getTransaction().begin();
-        entityManager.persist(agendamento);
-        entityManager.getTransaction().commit();
+        agendamentos.add(agendamento);
     }
 
     @Override
     public void atualizar(Agendamento agendamento) {
-        entityManager.getTransaction().begin();
-        entityManager.merge(agendamento);
-        entityManager.getTransaction().commit();
+        int index = agendamentos.indexOf(buscarPorId(agendamento.getId()));
+        if (index != -1) {
+            agendamentos.set(index, agendamento);
+        }
     }
 
     @Override
     public void excluir(Agendamento agendamento) {
-        entityManager.getTransaction().begin();
-        entityManager.remove(agendamento);
-        entityManager.getTransaction().commit();
+        agendamentos.removeIf(a -> a.getId().equals(agendamento.getId()));
     }
 
     @Override
     public boolean verificarDisponibilidade(Date dataHora, int duracaoMinutos) {
-        Query query = entityManager.createQuery(
-            "SELECT COUNT(a) FROM Agendamento a WHERE a.dataHora BETWEEN :inicio AND :fim"
-        );
-        query.setParameter("inicio", dataHora);
-        query.setParameter("fim", new Date(dataHora.getTime() + duracaoMinutos * 60000));
-        Long count = (Long) query.getSingleResult();
-        return count == 0;
+        Date fim = new Date(dataHora.getTime() + duracaoMinutos * 60000);
+        return agendamentos.stream()
+                .noneMatch(agendamento -> 
+                    agendamento.getDataHora().after(dataHora) && agendamento.getDataHora().before(fim));
     }
 }

@@ -7,29 +7,25 @@ import com.petshop.model.Pet;
 import java.util.List;
 
 public class PetController {
-    private PetDAO petDAO;
+    private PetDAO petDAO = new PetDAOImpl();
 
-    public PetController(PetDAO petDAO) {
-        this.petDAO = petDAO;
-    }
-
-    public Pet buscarPorId(Long id) {
-        return petDAO.buscarPorId(id);
-    }
-
-    public List<Pet> listarTodos() {
-        return petDAO.listarTodos();
-    }
-
-    public void salvar(Pet pet) {
+    public void adicionarPet(Pet pet) {
         petDAO.salvar(pet);
     }
 
-    public void atualizar(Pet pet) {
+    public List<Pet> listarPets() {
+        return petDAO.listarTodos();
+    }
+
+    public Pet buscarPetPorId(Long id) {
+        return petDAO.buscarPorId(id);
+    }
+
+    public void atualizarPet(Pet pet) {
         petDAO.atualizar(pet);
     }
 
-    public void excluir(Pet pet) {
+    public void excluirPet(Pet pet) {
         petDAO.excluir(pet);
     }
 }

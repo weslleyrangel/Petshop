@@ -9,18 +9,26 @@ import java.util.Date;
 import java.util.List;
 
 public class AgendamentoController {
-    private AgendamentoDAO agendamentoDAO;
+    private AgendamentoDAO agendamentoDAO = new AgendamentoDAOImpl();
 
-    public AgendamentoController(AgendamentoDAO agendamentoDAO) {
-        this.agendamentoDAO = agendamentoDAO;
+    public void adicionarAgendamento(Agendamento agendamento) {
+        agendamentoDAO.salvar(agendamento);
     }
 
-    public Agendamento buscarPorId(Long id) {
+    public List<Agendamento> listarAgendamentos() {
+        return agendamentoDAO.listarTodos();
+    }
+
+    public Agendamento buscarAgendamentoPorId(Long id) {
         return agendamentoDAO.buscarPorId(id);
     }
 
-    public List<Agendamento> listarTodos() {
-        return agendamentoDAO.listarTodos();
+    public void atualizarAgendamento(Agendamento agendamento) {
+        agendamentoDAO.atualizar(agendamento);
+    }
+
+    public void excluirAgendamento(Agendamento agendamento) {
+        agendamentoDAO.excluir(agendamento);
     }
 
     public List<Agendamento> listarPorPet(Long petId) {
@@ -33,18 +41,6 @@ public class AgendamentoController {
 
     public List<Agendamento> listarPorStatus(StatusAgendamento status) {
         return agendamentoDAO.listarPorStatus(status);
-    }
-
-    public void salvar(Agendamento agendamento) {
-        agendamentoDAO.salvar(agendamento);
-    }
-
-    public void atualizar(Agendamento agendamento) {
-        agendamentoDAO.atualizar(agendamento);
-    }
-
-    public void excluir(Agendamento agendamento) {
-        agendamentoDAO.excluir(agendamento);
     }
 
     public boolean verificarDisponibilidade(Date dataHora, int duracaoMinutos) {

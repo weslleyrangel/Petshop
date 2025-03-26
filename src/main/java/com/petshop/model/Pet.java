@@ -1,8 +1,6 @@
 package com.petshop.model;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "pets")
@@ -29,10 +27,6 @@ public class Pet {
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
-
-    // Removendo a lista de atendimentos
-    // @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // private List<Atendimento> atendimentos = new ArrayList<>();
 
     // Getters e Setters
     public Long getId() { return id; }
