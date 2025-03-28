@@ -1,13 +1,15 @@
 package com.petshop.controller;
 
 import com.petshop.dao.UsuarioDAO;
-import com.petshop.dao.UsuarioDAOImpl;
 import com.petshop.model.Usuario;
-
 import java.util.List;
 
 public class UsuarioController {
-    private UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
+    private UsuarioDAO usuarioDAO;
+
+    public UsuarioController(UsuarioDAO usuarioDAO) {
+        this.usuarioDAO = usuarioDAO;
+    }
 
     public void adicionarUsuario(Usuario usuario) {
         usuarioDAO.salvar(usuario);
@@ -31,5 +33,18 @@ public class UsuarioController {
 
     public boolean autenticar(String email, String senha) {
         return usuarioDAO.autenticar(email, senha);
+    }
+
+    public Usuario buscarPorEmail(String email) {
+        return usuarioDAO.buscarPorEmail(email);
+    }
+    
+    public UsuarioDAO getUsuarioDAO() {
+        return usuarioDAO;
+    }
+
+    // Novo método para contar o total de usuários
+    public int contarTotalUsuarios() {
+        return usuarioDAO.listarTodos().size();
     }
 }

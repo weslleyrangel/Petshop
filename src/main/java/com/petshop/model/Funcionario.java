@@ -14,7 +14,7 @@ public class Funcionario extends Usuario {
 
     // Construtor padrão
     public Funcionario() {
-        this.setTipo(TipoUsuario.FUNCIONARIO);
+        this.setTipo(TipoUsuario.OPERADOR);
     }
 
     // Getters e Setters

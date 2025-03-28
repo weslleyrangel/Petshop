@@ -1,7 +1,8 @@
 package com.petshop.dao;
 
-import com.petshop.model.Servico;
 import java.util.List;
+
+import com.petshop.model.Servico;
 
 public interface ServicoDAO {
     Servico buscarPorId(Long id);

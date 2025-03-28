@@ -46,9 +46,9 @@ public class UsuarioDAOImpl implements UsuarioDAO {
         usuarios.removeIf(u -> u.getId().equals(usuario.getId()));
     }
 
-    @Override
+   @Override
     public boolean autenticar(String email, String senha) {
-        return usuarios.stream()
-                .anyMatch(usuario -> usuario.getEmail().equals(email) && usuario.getSenha().equals(senha));
-    }
+    return usuarios.stream()
+            .anyMatch(usuario -> usuario.getEmail().equals(email) && usuario.getSenha().equals(senha));
+}
 }

@@ -4,18 +4,136 @@
  */
 package com.petshop.view;
 
+import com.petshop.controller.PetController;
+import com.petshop.controller.UsuarioController;
+import com.petshop.dao.UsuarioDAO;
+import com.petshop.model.Agendamento;
+import com.petshop.model.TipoUsuario;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.text.MaskFormatter;
+
 /**
  *
  * @author wesll
  */
 public class TelaPrincipal extends javax.swing.JFrame {
+    private UsuarioController usuarioController;
+    private PetController petController;
+    private UsuarioDAO usuarioDAO;
+    private List<Agendamento> agendamentos; // Lista de agendamentos
+    private javax.swing.JFormattedTextField txtDataAgendar;
 
-    /**
-     * Creates new form TelaPrincipal
-     */
-    public TelaPrincipal() {
+    public TelaPrincipal(UsuarioDAO usuarioDAO, PetController petController) {
         initComponents();
+        this.usuarioDAO = usuarioDAO;
+        this.usuarioController = new UsuarioController(usuarioDAO);
+        this.petController = petController;
+        this.agendamentos = new ArrayList<>(); // Inicializa a lista de agendamentos
+
+        try {
+            MaskFormatter dateFormatter = new MaskFormatter("##/##/####");
+            dateFormatter.setPlaceholderCharacter('_');
+            txtDataAgendar = new javax.swing.JFormattedTextField(dateFormatter);
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao formatar a data: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        
+
+        atualizarTotais();
     }
+    
+    public void adicionarAgendamento(Agendamento agendamento) {
+        agendamentos.add(agendamento);
+        exibirAgendamentos(); // Atualiza a tabela após adicionar um novo agendamento
+    }
+    
+    public void setNomeAdmin(String nome) {
+        jbNomeAdmin.setText(nome);
+    }
+    
+    
+    
+    public void exibirAgendamentos() {
+        DefaultTableModel modelo = (DefaultTableModel) tblAgendamentos.getModel();
+        modelo.setRowCount(0); // Limpa a tabela
+
+        // Adiciona cada agendamento à tabela
+        for (Agendamento agendamento : agendamentos) {
+            modelo.addRow(new Object[]{
+                agendamento.getHorario(),
+                agendamento.getServico(),
+                agendamento.getCliente(),
+                agendamento.getPet().getNome(), // Supondo que você queira exibir o nome do pet
+                agendamento.getDataHora() // Use getDataHora() para obter a data
+            });
+        }
+    }
+    
+     
+
+    public void setPermissoes(TipoUsuario tipo) {
+        if (tipo == TipoUsuario.ADMINISTRADOR) {
+            btnCadastroDeClientes.setEnabled(true);
+            btnCadastroDePet.setEnabled(true);
+            btnAgendamentos.setEnabled(true);
+            btnProdutos.setEnabled(true);
+        } else if (tipo == TipoUsuario.OPERADOR) {
+            btnCadastroDeClientes.setEnabled(true);
+            btnCadastroDePet.setEnabled(true);
+            btnAgendamentos.setEnabled(true);
+            btnProdutos.setEnabled(false);
+        } else if (tipo == TipoUsuario.USUARIO) {
+            btnCadastroDeClientes.setEnabled(false);
+            btnCadastroDePet.setEnabled(false);
+            btnAgendamentos.setEnabled(true);
+            btnProdutos.setEnabled(false);
+        }
+    }
+
+    private void atualizarTotais() {
+         if (usuarioController != null && petController != null) {
+            int totalClientes = usuarioController.contarTotalUsuarios();
+            jbTotalClientes.setText(String.valueOf(totalClientes));
+
+            int totalPets = petController.contarTotalPets();
+            jbTotalPets.setText(String.valueOf(totalPets));
+
+            int totalAgendamentos = contarAgendamentosDoDia(); // Método fictício, você deve implementar
+            jbAgendamentosDoDia.setText(String.valueOf(totalAgendamentos));
+        }
+    }
+    
+    private int contarAgendamentosDoDia() {
+        int contador = 0;
+            Calendar dataAtual = Calendar.getInstance(); // Obtém a data atual
+            dataAtual.set(Calendar.HOUR_OF_DAY, 0);
+            dataAtual.set(Calendar.MINUTE, 0);
+            dataAtual.set(Calendar.SECOND, 0);
+            dataAtual.set(Calendar.MILLISECOND, 0);
+
+        // Percorre a lista de agendamentos
+        for (Agendamento agendamento : agendamentos) {
+            Calendar dataAgendamento = Calendar.getInstance();
+            dataAgendamento.setTime(agendamento.getDataHora()); // Supondo que getDataHora() retorne um objeto Date
+            dataAgendamento.set(Calendar.HOUR_OF_DAY, 0);
+            dataAgendamento.set(Calendar.MINUTE, 0);
+            dataAgendamento.set(Calendar.SECOND, 0);
+            dataAgendamento.set(Calendar.MILLISECOND, 0);
+
+            // Verifica se a data do agendamento é igual à data atual
+            if (dataAgendamento.equals(dataAtual)) {
+                contador++; // Incrementa o contador se a data coincidir
+            }
+        }
+            return contador;
+        }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -43,7 +161,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         jbAgendamentosDoDia = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tabelaAgendamentos = new javax.swing.JTable();
+        tblAgendamentos = new javax.swing.JTable();
         jPanel8 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
@@ -51,6 +169,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
         btnCadastroDePet = new javax.swing.JButton();
         btnAgendamentos = new javax.swing.JButton();
         btnProdutos = new javax.swing.JButton();
+        btnTelaPrincipal = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -67,6 +186,9 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Seja bem-vindo(a),");
+
+        jbNomeAdmin.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        jbNomeAdmin.setForeground(new java.awt.Color(0, 245, 0));
 
         btnSair.setBackground(new java.awt.Color(255, 123, 123));
         btnSair.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
@@ -89,7 +211,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
                 .addGap(104, 104, 104)
                 .addComponent(jLabel2)
                 .addGap(18, 18, 18)
-                .addComponent(jbNomeAdmin)
+                .addComponent(jbNomeAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnSair, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(26, 26, 26))
@@ -101,7 +223,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jLabel2)
-                    .addComponent(jbNomeAdmin)
+                    .addComponent(jbNomeAdmin, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
                     .addComponent(btnSair, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(20, Short.MAX_VALUE))
         );
@@ -113,17 +235,18 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("Total de Clientes");
 
+        jbTotalClientes.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        jbTotalClientes.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                 .addContainerGap(33, Short.MAX_VALUE)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                        .addComponent(jbTotalClientes)
-                        .addGap(27, 27, 27)))
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jbTotalClientes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(33, 33, 33))
         );
         jPanel5Layout.setVerticalGroup(
@@ -132,8 +255,8 @@ public class TelaPrincipal extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jbTotalClientes)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jbTotalClientes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jPanel6.setBackground(new java.awt.Color(80, 161, 255));
@@ -142,18 +265,19 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jLabel6.setForeground(new java.awt.Color(255, 255, 255));
         jLabel6.setText("Total de Pets");
 
+        jbTotalPets.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        jbTotalPets.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
-                .addContainerGap(23, Short.MAX_VALUE)
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
-                        .addComponent(jbTotalPets)
-                        .addGap(14, 14, 14)))
-                .addGap(33, 33, 33))
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jbTotalPets, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -161,8 +285,8 @@ public class TelaPrincipal extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jbTotalPets)
-                .addContainerGap(34, Short.MAX_VALUE))
+                .addComponent(jbTotalPets, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jPanel7.setBackground(new java.awt.Color(80, 161, 255));
@@ -171,55 +295,58 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jLabel8.setForeground(new java.awt.Color(255, 255, 255));
         jLabel8.setText("Agendamentos do dia");
 
+        jbAgendamentosDoDia.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
+        jbAgendamentosDoDia.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jbAgendamentosDoDia.setPreferredSize(new java.awt.Dimension(38, 19));
+
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
-                .addContainerGap(56, Short.MAX_VALUE)
-                .addComponent(jbAgendamentosDoDia)
-                .addGap(107, 107, 107))
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addGap(22, 22, 22)
-                .addComponent(jLabel8)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jbAgendamentosDoDia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel8)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jbAgendamentosDoDia)
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jbAgendamentosDoDia, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
-        tabelaAgendamentos.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        tabelaAgendamentos.setModel(new javax.swing.table.DefaultTableModel(
+        tblAgendamentos.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        tblAgendamentos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Horário", "Serviço", "Cliente", "Pet"
+                "Horário", "Serviço", "Cliente", "Pet", "Data"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(tabelaAgendamentos);
-        if (tabelaAgendamentos.getColumnModel().getColumnCount() > 0) {
-            tabelaAgendamentos.getColumnModel().getColumn(0).setResizable(false);
-            tabelaAgendamentos.getColumnModel().getColumn(1).setResizable(false);
-            tabelaAgendamentos.getColumnModel().getColumn(2).setResizable(false);
-            tabelaAgendamentos.getColumnModel().getColumn(3).setResizable(false);
+        jScrollPane1.setViewportView(tblAgendamentos);
+        if (tblAgendamentos.getColumnModel().getColumnCount() > 0) {
+            tblAgendamentos.getColumnModel().getColumn(0).setResizable(false);
+            tblAgendamentos.getColumnModel().getColumn(1).setResizable(false);
+            tblAgendamentos.getColumnModel().getColumn(2).setResizable(false);
+            tblAgendamentos.getColumnModel().getColumn(3).setResizable(false);
+            tblAgendamentos.getColumnModel().getColumn(4).setResizable(false);
         }
 
         jPanel8.setBackground(new java.awt.Color(180, 215, 255));
@@ -249,13 +376,14 @@ public class TelaPrincipal extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 543, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(50, 50, 50)
+                        .addGap(41, 41, 41)
                         .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
-                        .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(41, 41, 41)
+                        .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(13, 13, 13))
                     .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -286,6 +414,11 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
         btnCadastroDePet.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         btnCadastroDePet.setText("Cadastro de Pet");
+        btnCadastroDePet.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCadastroDePetActionPerformed(evt);
+            }
+        });
 
         btnAgendamentos.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         btnAgendamentos.setText("Agendamentos");
@@ -304,6 +437,9 @@ public class TelaPrincipal extends javax.swing.JFrame {
             }
         });
 
+        btnTelaPrincipal.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
+        btnTelaPrincipal.setText("Tela Principal");
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -314,33 +450,38 @@ public class TelaPrincipal extends javax.swing.JFrame {
                     .addComponent(btnCadastroDePet, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnProdutos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnAgendamentos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCadastroDeClientes, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE))
+                    .addComponent(btnCadastroDeClientes, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
+                    .addComponent(btnTelaPrincipal, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(48, 48, 48)
+                .addGap(35, 35, 35)
+                .addComponent(btnTelaPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(35, 35, 35)
                 .addComponent(btnCadastroDeClientes, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
+                .addGap(35, 35, 35)
                 .addComponent(btnCadastroDePet, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(27, 27, 27)
+                .addGap(35, 35, 35)
                 .addComponent(btnAgendamentos, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
+                .addGap(35, 35, 35)
                 .addComponent(btnProdutos, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(149, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -351,7 +492,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(7, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -373,55 +514,38 @@ public class TelaPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSairActionPerformed
-        // TODO add your handling code here:
+        int resposta = JOptionPane.showConfirmDialog(this, "Você tem certeza que deseja sair?", "Confirmar Saída", JOptionPane.YES_NO_OPTION);
+        if (resposta == JOptionPane.YES_OPTION) {
+        // Passa a instância do UsuarioDAO e PetController para a TelaLogin
+        new TelaLogin(usuarioDAO, petController).setVisible(true); 
+        dispose(); // Fecha a tela atual
+    }
     }//GEN-LAST:event_btnSairActionPerformed
 
     private void btnCadastroDeClientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastroDeClientesActionPerformed
-        // TODO add your handling code here:
+        new TelaCadastroDeCliente(usuarioDAO, petController).setVisible(true); 
+        dispose(); // Fecha a tela 
     }//GEN-LAST:event_btnCadastroDeClientesActionPerformed
 
     private void btnAgendamentosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgendamentosActionPerformed
-        // TODO add your handling code here:
+        try {
+        new TelaAgendamentos(usuarioDAO, petController).setVisible(true);
+        dispose(); // Fecha a tela atual
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao abrir a tela de agendamentos: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnAgendamentosActionPerformed
 
     private void btnProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProdutosActionPerformed
-        // TODO add your handling code here:
+        new TelaProdutosLista(usuarioDAO, petController).setVisible(true); // Abre a tela de agendamentos
+        dispose(); // Fecha a tela 
     }//GEN-LAST:event_btnProdutosActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(TelaPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(TelaPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(TelaPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(TelaPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private void btnCadastroDePetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastroDePetActionPerformed
+        new TelaCadastrarPet(usuarioDAO, petController).setVisible(true);
+        dispose(); // Fecha a tela atual
+    }//GEN-LAST:event_btnCadastroDePetActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new TelaPrincipal().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgendamentos;
@@ -429,6 +553,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton btnCadastroDePet;
     private javax.swing.JButton btnProdutos;
     private javax.swing.JButton btnSair;
+    private javax.swing.JButton btnTelaPrincipal;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
@@ -448,6 +573,6 @@ public class TelaPrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel jbNomeAdmin;
     private javax.swing.JLabel jbTotalClientes;
     private javax.swing.JLabel jbTotalPets;
-    private javax.swing.JTable tabelaAgendamentos;
+    private javax.swing.JTable tblAgendamentos;
     // End of variables declaration//GEN-END:variables
 }

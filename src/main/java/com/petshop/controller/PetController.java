@@ -1,13 +1,15 @@
 package com.petshop.controller;
 
-import com.petshop.dao.PetDAO;
-import com.petshop.dao.PetDAOImpl;
+import com.petshop.dao.PetDAO; // Supondo que você tenha um DAO para pets
 import com.petshop.model.Pet;
-
 import java.util.List;
 
 public class PetController {
-    private PetDAO petDAO = new PetDAOImpl();
+    private PetDAO petDAO;
+
+    public PetController(PetDAO petDAO) {
+        this.petDAO = petDAO;
+    }
 
     public void adicionarPet(Pet pet) {
         petDAO.salvar(pet);
@@ -17,15 +19,15 @@ public class PetController {
         return petDAO.listarTodos();
     }
 
-    public Pet buscarPetPorId(Long id) {
-        return petDAO.buscarPorId(id);
+    public int contarTotalPets() {
+        return petDAO.listarTodos().size();
     }
 
-    public void atualizarPet(Pet pet) {
-        petDAO.atualizar(pet);
-    }
-
-    public void excluirPet(Pet pet) {
-        petDAO.excluir(pet);
+    public Pet buscarPorNome(String nome) {
+        // Implementar a lógica para buscar um pet pelo nome
+        return petDAO.listarTodos().stream()
+                .filter(pet -> pet.getNome().equalsIgnoreCase(nome))
+                .findFirst()
+                .orElse(null);
     }
 }

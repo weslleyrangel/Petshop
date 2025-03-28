@@ -30,6 +30,16 @@ public class Produto {
     @Column
     private String categoria;
 
+    // Construtor
+    public Produto(Long id, String nome, String descricao, BigDecimal preco, int quantidadeEstoque, String categoria) {
+        this.id = id;
+        this.nome = nome;
+        this.descricao = descricao;
+        this.preco = preco;
+        this.quantidadeEstoque = quantidadeEstoque;
+        this.categoria = categoria;
+    }
+
     // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

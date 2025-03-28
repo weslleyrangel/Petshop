@@ -1,7 +1,8 @@
 package com.petshop.dao;
 
-import com.petshop.model.Cliente;
 import java.util.List;
+
+import com.petshop.model.Cliente;
 
 public interface ClienteDAO {
     Cliente buscarPorId(Long id);

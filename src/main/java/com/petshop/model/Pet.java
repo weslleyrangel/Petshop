@@ -28,6 +28,18 @@ public class Pet {
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
+    public Pet(Long id, String nome, String especie, String raca, int idade, double peso) {
+        this.id = id;
+        this.nome = nome;
+        this.especie = especie;
+        this.raca = raca;
+        this.idade = idade;
+        this.peso = peso;
+        
+    }
+    
+    
+
     // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

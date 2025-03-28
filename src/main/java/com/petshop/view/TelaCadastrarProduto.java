@@ -1,20 +1,20 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package com.petshop.view;
 
-/**
- *
- * @author wesll
- */
-public class TelaCadastrarProduto extends javax.swing.JFrame {
+import com.petshop.controller.PetController;
+import com.petshop.dao.UsuarioDAO;
+import com.petshop.model.Produto; // Supondo que você tenha uma classe Produto
+import javax.swing.JOptionPane;
+import java.math.BigDecimal;
+import java.text.ParseException;
 
-    /**
-     * Creates new form TelaPrincipal
-     */
-    public TelaCadastrarProduto() {
+public class TelaCadastrarProduto extends javax.swing.JFrame {
+    private PetController petController;
+    private UsuarioDAO usuarioDAO;
+
+    public TelaCadastrarProduto(UsuarioDAO usuarioDAO, PetController petController) {
         initComponents();
+        this.usuarioDAO = usuarioDAO;
+        this.petController = petController;
     }
 
     /**
@@ -52,13 +52,14 @@ public class TelaCadastrarProduto extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtDescricao = new javax.swing.JTextPane();
-        btnCancelar = new javax.swing.JButton();
+        btnLimpar = new javax.swing.JButton();
         btnCadastrarProdutos = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         btnCadastroDeClientes = new javax.swing.JButton();
         btnCadastroDePet = new javax.swing.JButton();
         btnAgendamentos = new javax.swing.JButton();
         btnProdutos = new javax.swing.JButton();
+        btnTelaPrincipal = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -150,8 +151,13 @@ public class TelaCadastrarProduto extends javax.swing.JFrame {
 
         jScrollPane1.setViewportView(txtDescricao);
 
-        btnCancelar.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        btnCancelar.setText("Cancelar");
+        btnLimpar.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        btnLimpar.setText("Limpar");
+        btnLimpar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLimparActionPerformed(evt);
+            }
+        });
 
         btnCadastrarProdutos.setBackground(new java.awt.Color(80, 161, 255));
         btnCadastrarProdutos.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
@@ -189,7 +195,7 @@ public class TelaCadastrarProduto extends javax.swing.JFrame {
                         .addGap(0, 209, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnLimpar, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(btnCadastrarProdutos, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
@@ -263,7 +269,7 @@ public class TelaCadastrarProduto extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnCadastrarProdutos, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
-                    .addComponent(btnCancelar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnLimpar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -279,6 +285,11 @@ public class TelaCadastrarProduto extends javax.swing.JFrame {
 
         btnCadastroDePet.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         btnCadastroDePet.setText("Cadastro de Pet");
+        btnCadastroDePet.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCadastroDePetActionPerformed(evt);
+            }
+        });
 
         btnAgendamentos.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         btnAgendamentos.setText("Agendamentos");
@@ -297,6 +308,14 @@ public class TelaCadastrarProduto extends javax.swing.JFrame {
             }
         });
 
+        btnTelaPrincipal.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
+        btnTelaPrincipal.setText("Tela Principal");
+        btnTelaPrincipal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTelaPrincipalActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -307,21 +326,24 @@ public class TelaCadastrarProduto extends javax.swing.JFrame {
                     .addComponent(btnCadastroDePet, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnProdutos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnAgendamentos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCadastroDeClientes, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE))
+                    .addComponent(btnCadastroDeClientes, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
+                    .addComponent(btnTelaPrincipal, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(48, 48, 48)
+                .addGap(35, 35, 35)
+                .addComponent(btnTelaPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(35, 35, 35)
                 .addComponent(btnCadastroDeClientes, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
+                .addGap(35, 35, 35)
                 .addComponent(btnCadastroDePet, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(27, 27, 27)
+                .addGap(35, 35, 35)
                 .addComponent(btnAgendamentos, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
+                .addGap(35, 35, 35)
                 .addComponent(btnProdutos, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(233, Short.MAX_VALUE))
+                .addContainerGap(150, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -366,81 +388,102 @@ public class TelaCadastrarProduto extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSairActionPerformed
-        // TODO add your handling code here:
+        int resposta = JOptionPane.showConfirmDialog(this, "Você tem certeza que deseja sair?", "Confirmar Saída", JOptionPane.YES_NO_OPTION);
+        if (resposta == JOptionPane.YES_OPTION) {
+            new TelaLogin(usuarioDAO, petController).setVisible(true); 
+            dispose(); // Fecha a tela atual
+        }
     }//GEN-LAST:event_btnSairActionPerformed
 
     private void btnCadastroDeClientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastroDeClientesActionPerformed
-        // TODO add your handling code here:
+        new TelaCadastroDeCliente(usuarioDAO, petController).setVisible(true);
+        dispose(); // Fecha a tela atual
     }//GEN-LAST:event_btnCadastroDeClientesActionPerformed
 
     private void btnAgendamentosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgendamentosActionPerformed
-        // TODO add your handling code here:
+        try {
+            new TelaAgendamentos(usuarioDAO, petController).setVisible(true);
+            dispose(); // Fecha a tela atual
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao abrir a tela de agendamentos: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnAgendamentosActionPerformed
 
     private void btnProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProdutosActionPerformed
-        // TODO add your handling code here:
+        new TelaProdutosLista(usuarioDAO, petController).setVisible(true); // Abre a tela de produtos
+        dispose(); // Fecha a tela atual
     }//GEN-LAST:event_btnProdutosActionPerformed
 
     private void btnCadastrarProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarProdutosActionPerformed
-        // TODO add your handling code here:
+        String codigo = txtCodigo.getText();
+        String nome = txtNomeDoProduto.getText();
+        String marca = txtMarcaProduto.getText();
+        String categoria = (String) cbCategoria.getSelectedItem();
+        String dataValidade = txtDataDeValidade.getText();
+        String precoStr = txtPreco.getText();
+        String estoqueStr = txtEstoque.getText();
+        String descricao = txtDescricao.getText();
+
+        // Validação simples
+        if (codigo.isEmpty() || nome.isEmpty() || marca.isEmpty() || dataValidade.isEmpty() || precoStr.isEmpty() || estoqueStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, preencha todos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Converte os valores de preço e estoque
+        BigDecimal preco = new BigDecimal(precoStr);
+        int estoque = Integer.parseInt(estoqueStr);
+
+        // Cria um novo objeto Produto
+        Produto novoProduto = new Produto(null, nome, descricao, preco, estoque, categoria);
+        // Salva o novo produto (você deve implementar o método no controlador)
+        // produtoController.adicionarProduto(novoProduto); // Supondo que você tenha um método para adicionar produtos
+
+        JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso!");
+        btnLimparActionPerformed(evt); // Limpa os campos para iniciar um próximo cadastro
     }//GEN-LAST:event_btnCadastrarProdutosActionPerformed
 
     private void txtNomeDoProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNomeDoProdutoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtNomeDoProdutoActionPerformed
 
+    private void btnCadastroDePetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastroDePetActionPerformed
+        new TelaCadastrarPet(usuarioDAO, petController).setVisible(true);
+        dispose(); // Fecha a tela atual
+    }//GEN-LAST:event_btnCadastroDePetActionPerformed
+
+    private void btnTelaPrincipalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTelaPrincipalActionPerformed
+        TelaPrincipal telaPrincipal = new TelaPrincipal(usuarioDAO, petController);
+        telaPrincipal.setVisible(true); // Torna a TelaPrincipal visível
+        this.dispose(); // Fecha a tela atual
+    }//GEN-LAST:event_btnTelaPrincipalActionPerformed
+
+    private void btnLimparActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimparActionPerformed
+        txtCodigo.setText("");
+        txtNomeDoProduto.setText("");
+        txtMarcaProduto.setText("");
+        cbCategoria.setSelectedIndex(0); // Reseta para o primeiro item
+        txtDataDeValidade.setText("");
+        txtPreco.setText("");
+        txtEstoque.setText("");
+        txtDescricao.setText("");
+    }//GEN-LAST:event_btnLimparActionPerformed
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(TelaCadastrarProduto.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(TelaCadastrarProduto.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(TelaCadastrarProduto.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(TelaCadastrarProduto.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new TelaCadastrarProduto().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgendamentos;
     private javax.swing.JButton btnCadastrarProdutos;
     private javax.swing.JButton btnCadastroDeClientes;
     private javax.swing.JButton btnCadastroDePet;
-    private javax.swing.JButton btnCancelar;
+    private javax.swing.JButton btnLimpar;
     private javax.swing.JButton btnListaDeProdutos;
     private javax.swing.JButton btnPageCadastrarProduto;
     private javax.swing.JButton btnProdutos;
     private javax.swing.JButton btnSair;
+    private javax.swing.JButton btnTelaPrincipal;
     private javax.swing.JComboBox<String> cbCategoria;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

@@ -1,43 +1,58 @@
 package com.petshop.model;
 
-import jakarta.persistence.*;
 import java.util.Date;
 
-@Entity
-@Table(name = "agendamentos")
 public class Agendamento {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // ID do agendamento
+    private String cliente; // Nome do cliente
+    private Pet pet; // O pet deve ser do tipo Pet
+    private Date dataHora; // Data e hora do agendamento
+    private String servico; // Serviço a ser realizado
+    private String observacoes; // Observações sobre o agendamento
+    private String horario; // Horário do agendamento
+    private StatusAgendamento status; // Status do agendamento
 
-    @ManyToOne
-    @JoinColumn(name = "pet_id", nullable = false)
-    private Pet pet;
+    public Agendamento(Long id, String cliente, Pet pet, Date dataHora, String servico, String observacoes, String horario, StatusAgendamento status) {
+        this.id = id;
+        this.cliente = cliente;
+        this.pet = pet;
+        this.dataHora = dataHora;
+        this.servico = servico;
+        this.observacoes = observacoes;
+        this.horario = horario;
+        this.status = status; // Inicializa o status
+    }
 
-    @ManyToOne
-    @JoinColumn(name = "servico_id", nullable = false)
-    private Servico servico;
+    // Getters
+    public Long getId() {
+        return id; // Retorna o ID do agendamento
+    }
 
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dataHora;
+    public String getCliente() {
+        return cliente; // Retorna o nome do cliente
+    }
 
-    @Enumerated(EnumType.STRING)
-    private StatusAgendamento status;
+    public Pet getPet() {
+        return pet; // Retorna o pet
+    }
 
-    // Getters e Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Date getDataHora() {
+        return dataHora; // Retorna a data e hora do agendamento
+    }
 
-    public Pet getPet() { return pet; }
-    public void setPet(Pet pet) { this.pet = pet; }
+    public String getServico() {
+        return servico; // Retorna o serviço
+    }
 
-    public Servico getServico() { return servico; }
-    public void setServico(Servico servico) { this.servico = servico; }
+    public String getObservacoes() {
+        return observacoes; // Retorna as observações
+    }
 
-    public Date getDataHora() { return dataHora; }
-    public void setDataHora(Date dataHora) { this.dataHora = dataHora; }
+    public String getHorario() {
+        return horario; // Retorna o horário
+    }
 
-    public StatusAgendamento getStatus() { return status; }
-    public void setStatus(StatusAgendamento status) { this.status = status; }
+    public StatusAgendamento getStatus() {
+        return status; // Retorna o status do agendamento
+    }
 }

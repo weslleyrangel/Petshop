@@ -66,6 +66,8 @@ public class AgendamentoDAOImpl implements AgendamentoDAO {
         int index = agendamentos.indexOf(buscarPorId(agendamento.getId()));
         if (index != -1) {
             agendamentos.set(index, agendamento);
+        } else {
+            throw new IllegalArgumentException("Agendamento não encontrado para atualização.");
         }
     }
 
@@ -79,6 +81,8 @@ public class AgendamentoDAOImpl implements AgendamentoDAO {
         Date fim = new Date(dataHora.getTime() + duracaoMinutos * 60000);
         return agendamentos.stream()
                 .noneMatch(agendamento -> 
-                    agendamento.getDataHora().after(dataHora) && agendamento.getDataHora().before(fim));
+                    agendamento.getDataHora().after(dataHora) && agendamento.getDataHora().before(fim) ||
+                    agendamento.getDataHora().equals(dataHora) || 
+                    agendamento.getDataHora().equals(fim));
     }
 }

@@ -1,22 +1,81 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
+
 package com.petshop.view;
 
-/**
- *
- * @author wesll
- */
-public class TelaAgendamentos extends javax.swing.JFrame {
+import com.petshop.controller.ClienteController;
+import com.petshop.controller.PetController;
+import com.petshop.dao.UsuarioDAO;
+import com.petshop.model.Agendamento;
+import com.petshop.model.Pet; // Certifique-se de importar a classe Pet
+import com.petshop.model.StatusAgendamento; // Certifique-se de importar a classe StatusAgendamento
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.text.MaskFormatter;
 
-    /**
-     * Creates new form TelaPrincipal
-     */
-    public TelaAgendamentos() {
+public class TelaAgendamentos extends javax.swing.JFrame {
+    private ClienteController clienteController;
+    private PetController petController;
+    private UsuarioDAO usuarioDAO;
+    private List<Agendamento> agendamentos; // Lista de agendamentos
+    private javax.swing.JTable tblAgendamentos; // Tabela de agendamentos
+
+    public TelaAgendamentos(UsuarioDAO usuarioDAO, PetController petController) throws ParseException {
         initComponents();
+        this.clienteController = new ClienteController();
+        this.petController = petController;
+        this.agendamentos = new ArrayList<>(); // Inicializa a lista de agendamentos
+
+        // Configuração do campo de data
+        try {
+            MaskFormatter dateFormatter = new MaskFormatter("##/##/####");
+            dateFormatter.setPlaceholderCharacter('_');
+            txtDataAgendar = new javax.swing.JFormattedTextField(dateFormatter);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao formatar a data: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+
+        // Inicializa a tabela
+        tblAgendamentos = new javax.swing.JTable();
+        tblAgendamentos.setModel(new DefaultTableModel(
+            new Object [][] {},
+            new String [] {
+                "Horário", "Serviço", "Cliente", "Pet", "Data"
+            }
+        ));
     }
 
+    public void exibirHorarioSelecionado(String horarioSelecionado) {
+        txtHorarioSelecionado.setText(horarioSelecionado); // Exibe o horário selecionado
+    }
+    
+    private boolean isHorarioDisponivel(String horario, String data) {
+        for (Agendamento agendamento : agendamentos) {
+            // Verifica se o horário e a data do agendamento já existem
+            if (agendamento.getHorario().equals(horario) && agendamento.getDataHora().equals(data)) {
+                return false; // Horário já ocupado
+            }
+        }
+    return true; // Horário disponível
+    }
+    
+    public void exibirAgendamentos() {
+        DefaultTableModel modelo = (DefaultTableModel) tblAgendamentos.getModel();
+        modelo.setRowCount(0); // Limpa a tabela
+
+        // Adiciona cada agendamento à tabela
+        for (Agendamento agendamento : agendamentos) {
+            modelo.addRow(new Object[]{
+                agendamento.getHorario(),
+                agendamento.getServico(),
+                agendamento.getCliente(),
+                agendamento.getPet().getNome(), // Supondo que você queira exibir o nome do pet
+                agendamento.getDataHora() // Use getDataHora() para obter a data
+            });
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -41,19 +100,20 @@ public class TelaAgendamentos extends javax.swing.JFrame {
         txtPet = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
-        btnCancelar = new javax.swing.JButton();
+        btnLimpar = new javax.swing.JButton();
         btnAgendar = new javax.swing.JButton();
-        cbHorarios = new javax.swing.JComboBox<>();
         txtDataAgendar = new javax.swing.JFormattedTextField();
         cbServicos = new javax.swing.JComboBox<>();
         btnVerHorarios = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         txtObservacoesAgendar = new javax.swing.JTextArea();
+        txtHorarioSelecionado = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         btnCadastroDeClientes = new javax.swing.JButton();
         btnCadastroDePet = new javax.swing.JButton();
         btnAgendamentos = new javax.swing.JButton();
         btnProdutos = new javax.swing.JButton();
+        btnTelaPrincipal = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -129,8 +189,13 @@ public class TelaAgendamentos extends javax.swing.JFrame {
 
         jLabel10.setText("Observações:");
 
-        btnCancelar.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        btnCancelar.setText("Cancelar");
+        btnLimpar.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        btnLimpar.setText("Limpar");
+        btnLimpar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLimparActionPerformed(evt);
+            }
+        });
 
         btnAgendar.setBackground(new java.awt.Color(80, 161, 255));
         btnAgendar.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
@@ -142,16 +207,23 @@ public class TelaAgendamentos extends javax.swing.JFrame {
             }
         });
 
-        cbHorarios.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        txtDataAgendar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtDataAgendarActionPerformed(evt);
+            }
+        });
 
-        txtDataAgendar.setText("jFormattedTextField1");
-
-        cbServicos.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbServicos.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Banho", "Tosa", "Banho e Tosa", "Exames de laboratório", "Vacinação\t", "Hidratação", "Massagem" }));
 
         btnVerHorarios.setBackground(new java.awt.Color(80, 161, 255));
         btnVerHorarios.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         btnVerHorarios.setForeground(new java.awt.Color(255, 255, 255));
         btnVerHorarios.setText("Horários Livres");
+        btnVerHorarios.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerHorariosActionPerformed(evt);
+            }
+        });
 
         txtObservacoesAgendar.setColumns(20);
         txtObservacoesAgendar.setRows(5);
@@ -172,7 +244,7 @@ public class TelaAgendamentos extends javax.swing.JFrame {
                             .addComponent(txtCliente)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(btnLimpar, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(btnAgendar, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(txtPet)
@@ -186,13 +258,8 @@ public class TelaAgendamentos extends javax.swing.JFrame {
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(cbServicos, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel3Layout.createSequentialGroup()
-                                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel3Layout.createSequentialGroup()
-                                                .addComponent(cbHorarios, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(18, 18, 18)
-                                                .addComponent(btnVerHorarios)))
-                                        .addGap(0, 6, Short.MAX_VALUE)))
+                                        .addComponent(jLabel4)
+                                        .addGap(0, 275, Short.MAX_VALUE)))
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel5)
@@ -201,6 +268,12 @@ public class TelaAgendamentos extends javax.swing.JFrame {
                                         .addComponent(txtDataAgendar, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addComponent(jScrollPane2))))
                 .addContainerGap())
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(txtHorarioSelecionado, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnVerHorarios)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -215,9 +288,9 @@ public class TelaAgendamentos extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(txtPet, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(12, 12, 12)
                         .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cbServicos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel5)
@@ -227,8 +300,8 @@ public class TelaAgendamentos extends javax.swing.JFrame {
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cbHorarios, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnVerHorarios))
+                    .addComponent(btnVerHorarios)
+                    .addComponent(txtHorarioSelecionado))
                 .addGap(22, 22, 22)
                 .addComponent(jLabel10)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -236,7 +309,7 @@ public class TelaAgendamentos extends javax.swing.JFrame {
                 .addGap(44, 44, 44)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnAgendar, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
-                    .addComponent(btnCancelar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnLimpar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(23, Short.MAX_VALUE))
         );
 
@@ -253,6 +326,11 @@ public class TelaAgendamentos extends javax.swing.JFrame {
 
         btnCadastroDePet.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         btnCadastroDePet.setText("Cadastro de Pet");
+        btnCadastroDePet.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCadastroDePetActionPerformed(evt);
+            }
+        });
 
         btnAgendamentos.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
         btnAgendamentos.setText("Agendamentos");
@@ -271,27 +349,38 @@ public class TelaAgendamentos extends javax.swing.JFrame {
             }
         });
 
+        btnTelaPrincipal.setFont(new java.awt.Font("Arial", 0, 16)); // NOI18N
+        btnTelaPrincipal.setText("Tela Principal");
+        btnTelaPrincipal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTelaPrincipalActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnCadastroDePet, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnProdutos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnAgendamentos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCadastroDeClientes, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE))
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnTelaPrincipal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCadastroDePet, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnProdutos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnAgendamentos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCadastroDeClientes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(48, 48, 48)
+                .addGap(35, 35, 35)
+                .addComponent(btnTelaPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(35, 35, 35)
                 .addComponent(btnCadastroDeClientes, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
+                .addGap(35, 35, 35)
                 .addComponent(btnCadastroDePet, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(27, 27, 27)
+                .addGap(35, 35, 35)
                 .addComponent(btnAgendamentos, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(26, 26, 26)
                 .addComponent(btnProdutos, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -340,11 +429,16 @@ public class TelaAgendamentos extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSairActionPerformed
-        // TODO add your handling code here:
+        int resposta = JOptionPane.showConfirmDialog(this, "Você tem certeza que deseja sair?", "Confirmar Saída", JOptionPane.YES_NO_OPTION);
+        if (resposta == JOptionPane.YES_OPTION) {
+        new TelaLogin(usuarioDAO, petController).setVisible(true); 
+        dispose(); // Fecha a tela atual
+        }
     }//GEN-LAST:event_btnSairActionPerformed
 
     private void btnCadastroDeClientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastroDeClientesActionPerformed
-        // TODO add your handling code here:
+        new TelaCadastroDeCliente(usuarioDAO, petController).setVisible(true);
+        dispose(); // Fecha a tela atual
     }//GEN-LAST:event_btnCadastroDeClientesActionPerformed
 
     private void btnAgendamentosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgendamentosActionPerformed
@@ -352,77 +446,102 @@ public class TelaAgendamentos extends javax.swing.JFrame {
     }//GEN-LAST:event_btnAgendamentosActionPerformed
 
     private void btnProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProdutosActionPerformed
-        // TODO add your handling code here:
+        new TelaProdutosLista(usuarioDAO, petController).setVisible(true); // Abre a tela de produtos
+        dispose(); // Fecha a tela atual
     }//GEN-LAST:event_btnProdutosActionPerformed
 
     private void btnAgendarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgendarActionPerformed
-        // TODO add your handling code here:
+         String cliente = txtCliente.getText();
+        String petNome = txtPet.getText(); // Nome do pet
+        String data = txtDataAgendar.getText();
+        String servico = (String) cbServicos.getSelectedItem();
+        String observacoes = txtObservacoesAgendar.getText();
+        String horario = txtHorarioSelecionado.getText();
+
+        // Validação simples
+        if (cliente.isEmpty() || petNome.isEmpty() || data.isEmpty() || servico.isEmpty() || horario.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, preencha todos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Aqui você deve buscar o objeto Pet correspondente ao nome fornecido
+        Pet pet = petController.buscarPorNome(petNome); // Supondo que você tenha um método para buscar o pet pelo nome
+        if (pet == null) {
+            JOptionPane.showMessageDialog(this, "Pet não encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Verifica se o horário está disponível
+        if (!isHorarioDisponivel(horario, data)) {
+            JOptionPane.showMessageDialog(this, "Este horário já está indisponível para o dia selecionado.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Cria um novo agendamento
+        Agendamento novoAgendamento = new Agendamento(
+            null, // ID será gerado na DAO
+            cliente,
+            pet,
+            new Date(), // Use a data atual ou converta a string para Date
+            servico,
+            observacoes,
+            horario,
+            StatusAgendamento.PENDENTE // Agora deve funcionar corretamente
+        );
+
+        // Adiciona o agendamento à lista na TelaPrincipal
+        TelaPrincipal telaPrincipal = (TelaPrincipal) this.getParent();
+        telaPrincipal.adicionarAgendamento(novoAgendamento);
+
+        JOptionPane.showMessageDialog(this, "Agendamento realizado com sucesso!");
+        btnLimparActionPerformed(evt); // Limpa os campos para iniciar um próximo agendamento                            
+                                                    
     }//GEN-LAST:event_btnAgendarActionPerformed
 
     private void txtPetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPetActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPetActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(TelaAgendamentos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(TelaAgendamentos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(TelaAgendamentos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(TelaAgendamentos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
+    private void txtDataAgendarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDataAgendarActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDataAgendarActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new TelaAgendamentos().setVisible(true);
-            }
-        });
-    }
+    private void btnLimparActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimparActionPerformed
+        txtCliente.setText("");
+        txtPet.setText("");
+        txtDataAgendar.setText("");
+        cbServicos.setSelectedIndex(0); // Reseta para o primeiro item
+        txtObservacoesAgendar.setText("");
+        txtHorarioSelecionado.setText(""); // Limpa o horário selecionado
+    }//GEN-LAST:event_btnLimparActionPerformed
+
+    private void btnVerHorariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerHorariosActionPerformed
+        TelaHorariosDisponiveis telaHorariosDisponiveis = new TelaHorariosDisponiveis(this);
+        telaHorariosDisponiveis.setVisible(true);
+    }//GEN-LAST:event_btnVerHorariosActionPerformed
+
+    private void btnCadastroDePetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastroDePetActionPerformed
+        new TelaCadastrarPet(usuarioDAO, petController).setVisible(true);
+        dispose(); // Fecha a tela atual
+    }//GEN-LAST:event_btnCadastroDePetActionPerformed
+
+    private void btnTelaPrincipalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTelaPrincipalActionPerformed
+        TelaPrincipal telaPrincipal = new TelaPrincipal(usuarioDAO, petController);
+        telaPrincipal.setVisible(true); // Torna a TelaPrincipal visível
+        this.dispose(); // Fecha a tela atual
+    }//GEN-LAST:event_btnTelaPrincipalActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAgendamentos;
     private javax.swing.JButton btnAgendar;
     private javax.swing.JButton btnCadastroDeClientes;
     private javax.swing.JButton btnCadastroDePet;
-    private javax.swing.JButton btnCancelar;
+    private javax.swing.JButton btnLimpar;
     private javax.swing.JButton btnProdutos;
     private javax.swing.JButton btnSair;
+    private javax.swing.JButton btnTelaPrincipal;
     private javax.swing.JButton btnVerHorarios;
-    private javax.swing.JComboBox<String> cbHorarios;
     private javax.swing.JComboBox<String> cbServicos;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -440,6 +559,7 @@ public class TelaAgendamentos extends javax.swing.JFrame {
     private javax.swing.JLabel jbNomeAdmin;
     private javax.swing.JTextField txtCliente;
     private javax.swing.JFormattedTextField txtDataAgendar;
+    private javax.swing.JLabel txtHorarioSelecionado;
     private javax.swing.JTextArea txtObservacoesAgendar;
     private javax.swing.JTextField txtPet;
     // End of variables declaration//GEN-END:variables

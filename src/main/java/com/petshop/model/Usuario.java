@@ -1,31 +1,16 @@
 package com.petshop.model;
 
-import jakarta.persistence.*;
-import java.util.Objects;
-
-@Entity
-@Table(name = "usuarios")
-@Inheritance(strategy = InheritanceType.JOINED)
 public class Usuario {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String nome;
-
-    @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(nullable = false)
     private String senha;
+    private TipoUsuario tipo; // Enum para definir o tipo de usuário
 
-    @Column(nullable = false)
-    private String telefone;
-
-    @Enumerated(EnumType.STRING)
-    private TipoUsuario tipo;
-
+    // Construtor padrão
+    public Usuario() {}
+    
+    
     // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -39,22 +24,6 @@ public class Usuario {
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }
 
-    public String getTelefone() { return telefone; }
-    public void setTelefone(String telefone) { this.telefone = telefone; }
-
     public TipoUsuario getTipo() { return tipo; }
     public void setTipo(TipoUsuario tipo) { this.tipo = tipo; }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Usuario usuario = (Usuario) o;
-        return Objects.equals(id, usuario.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }
